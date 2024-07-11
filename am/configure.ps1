@@ -36,6 +36,12 @@ Function Exit-Clean {
     exit 1
 }
 
+# A utility function to Find and Replace texts in a file.
+Function Find-Replace {
+    param ([string]$File, [string]$Find, [string]$Replace)
+    Set-Content -Path $File -Value (get-content $File | ForEach-Object{ $_ -replace $Find, $Replace })
+}
+
 # Get the root directory location of the accelerator. Which is <BASE_PRODUCT>/<ACCELERATOR>/
 Set-Location (Join-Path $PSScriptRoot ".\..\")
 $WSO2_OB_ACCELERATOR_HOME = (Get-Location).path
@@ -80,24 +86,24 @@ Function Set-Datasources
     if ($PROPERTIES.'DB_TYPE' -eq "mysql")
     {
         # MySQL
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_APIMGT_URL", "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_APIMGT' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_AM_CONFIG_URL", "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_AM_CONFIG' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_GOV_URL", "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_GOV' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_USER_STORE_URL", "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_USER_STORE' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_USER", "$( $PROPERTIES.'DB_USER' )" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_PASS", "$( $PROPERTIES.'DB_PASS' )" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_DRIVER", "$( $PROPERTIES.'DB_DRIVER' )" })
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_APIMGT_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_APIMGT' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_AM_CONFIG_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_AM_CONFIG' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_GOV_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_GOV' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_USER_STORE_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_USER_STORE' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_USER" "$( $PROPERTIES.'DB_USER' )"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_PASS" "$( $PROPERTIES.'DB_PASS' )"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_DRIVER" "$( $PROPERTIES.'DB_DRIVER' )"
     }
     elseif($PROPERTIES.'DB_TYPE' -eq "mssql")
     {
         # Microsoft SQL Server
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_APIMGT_URL", "jdbc:sqlserver://$( $PROPERTIES.'DB_HOST' ):1433;databaseName=$( $PROPERTIES.'DB_APIMGT' );encrypt=false" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_AM_CONFIG_URL", "jdbc:sqlserver://$( $PROPERTIES.'DB_HOST' ):1433;databaseName=$( $PROPERTIES.'DB_AM_CONFIG' );encrypt=false" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_GOV_URL", "jdbc:sqlserver://$( $PROPERTIES.'DB_HOST' ):1433;databaseName=$( $PROPERTIES.'DB_GOV' );encrypt=false" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_USER_STORE_URL", "jdbc:sqlserver://$( $PROPERTIES.'DB_HOST' ):1433;databaseName=$( $PROPERTIES.'DB_USER_STORE' );encrypt=false" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_USER", "$( $PROPERTIES.'DB_USER' )" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_PASS", "$( $PROPERTIES.'DB_PASS' )" })
-        Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (Get-Content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "DB_DRIVER", "$( $PROPERTIES.'DB_DRIVER' )" })
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_APIMGT_URL" "jdbc:sqlserver://$( $PROPERTIES.'DB_HOST' ):1433;databaseName=$( $PROPERTIES.'DB_APIMGT' );encrypt=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_AM_CONFIG_URL" "jdbc:sqlserver://$( $PROPERTIES.'DB_HOST' ):1433;databaseName=$( $PROPERTIES.'DB_AM_CONFIG' );encrypt=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_GOV_URL" "jdbc:sqlserver://$( $PROPERTIES.'DB_HOST' ):1433;databaseName=$( $PROPERTIES.'DB_GOV' );encrypt=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_USER_STORE_URL" "jdbc:sqlserver://$( $PROPERTIES.'DB_HOST' ):1433;databaseName=$( $PROPERTIES.'DB_USER_STORE' );encrypt=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_USER" "$( $PROPERTIES.'DB_USER' )"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_PASS" "$( $PROPERTIES.'DB_PASS' )"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_DRIVER" "$( $PROPERTIES.'DB_DRIVER' )"
     }
     else {
         Write-Output "[ERROR] Unsupported Database Type!"
@@ -107,9 +113,21 @@ Function Set-Datasources
 
 # A function to replace the hostname related variables in the temp deployment.toml with their actual values from configure.properties 
 Function Set-Hostnames {
-    Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (get-content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "APIM_HOSTNAME", "$( $PROPERTIES.'APIM_HOSTNAME' )" })
-    Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (get-content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "IS_HOSTNAME", "$( $PROPERTIES.'IS_HOSTNAME' )" })
-    Set-Content -Path $DEPLOYMENT_TOML_FILE -Value (get-content $DEPLOYMENT_TOML_FILE | ForEach-Object{ $_ -replace "BI_HOSTNAME", "$( $PROPERTIES.'BI_HOSTNAME' )" })
+    Find-Replace $DEPLOYMENT_TOML_FILE "APIM_HOSTNAME" "$( $PROPERTIES.'APIM_HOSTNAME' )"
+    Find-Replace $DEPLOYMENT_TOML_FILE "IS_HOSTNAME" "$( $PROPERTIES.'IS_HOSTNAME' )"
+    Find-Replace $DEPLOYMENT_TOML_FILE "BI_HOSTNAME" "$( $PROPERTIES.'BI_HOSTNAME' )"
+}
+
+# A utility function to create a database.
+Function Add-Database {
+    param ([string]$DB_USER, [string]$DB_PASS, [string]$DB_HOST, [string]$DB_NAME)
+    mysql -u"$($DB_USER)" -p"$($DB_PASS)" -h"$($DB_HOST)" -e "DROP DATABASE IF EXISTS $($DB_NAME); CREATE DATABASE $( $DB_NAME ) DEFAULT CHARACTER SET latin1;"
+}
+
+# A utility function to create a table inside a given database.
+Function Add-TablesToDatabase {
+    param ([string]$DB_USER, [string]$DB_PASS, [string]$DB_HOST, [string]$DB_NAME, [string]$DB_SOURCE)
+    mysql -u"$($DB_USER)" -p"$($DB_PASS)" -h"$($DB_HOST)" -D"$($DB_NAME)" -e "SOURCE $($DB_SOURCE)"
 }
 
 # A function to create the databases. ONLY SUPPORTED FOR THE MYSQL
@@ -120,13 +138,16 @@ Function Add-Databases {
             $DB_MYSQL_PASS = $PROPERTIES.'DB_PASS'
         }
 
-        mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -h"$( $PROPERTIES.'DB_HOST' )" -e "DROP DATABASE IF EXISTS $( $PROPERTIES.'DB_APIMGT' ); CREATE DATABASE $( $PROPERTIES.'DB_APIMGT' ) DEFAULT CHARACTER SET latin1;"
+        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_APIMGT' )"
         Write-Output "[INFO] Database Created: $( $PROPERTIES.'DB_APIMGT' )"
-        mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -h"$( $PROPERTIES.'DB_HOST' )" -e "DROP DATABASE IF EXISTS $( $PROPERTIES.'DB_AM_CONFIG' ); CREATE DATABASE $( $PROPERTIES.'DB_AM_CONFIG' ) DEFAULT CHARACTER SET latin1;"
+        
+        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_AM_CONFIG' )"
         Write-Output "[INFO] Database Created: $( $PROPERTIES.'DB_AM_CONFIG' )"
-        mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -h"$( $PROPERTIES.'DB_HOST' )" -e "DROP DATABASE IF EXISTS $( $PROPERTIES.'DB_GOV' ); CREATE DATABASE $( $PROPERTIES.'DB_GOV' ) DEFAULT CHARACTER SET latin1;"
+        
+        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_GOV' )"
         Write-Output "[INFO] Database Created: $( $PROPERTIES.'DB_GOV' )"
-        mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -h"$( $PROPERTIES.'DB_HOST' )" -e "DROP DATABASE IF EXISTS $( $PROPERTIES.'DB_USER_STORE' ); CREATE DATABASE $( $PROPERTIES.'DB_USER_STORE' ) DEFAULT CHARACTER SET latin1;"
+        
+        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_USER_STORE' )"
         Write-Output "[INFO] Database Created: $( $PROPERTIES.'DB_USER_STORE' )"        
     }
     else {
@@ -139,28 +160,31 @@ Function Add-DatabaseTables {
     if ($PROPERTIES.'DB_TYPE' -eq "mysql") {
 
         Write-Output "[NOTE] Update am_application_registration table input field size (temporary)"
-        Set-Content -Path (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mysql.sql") -Value (Get-Content (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mysql.sql") | ForEach-Object{ $_ -replace "INPUTS VARCHAR(1000)", "INPUTS VARCHAR(7500)" })
+        Find-Replace (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mysql.sql") "INPUTS VARCHAR(1000)" "INPUTS VARCHAR(7500)"
 
         $DB_MYSQL_PASS = ""
         if (-NOT($PROPERTIES.'DB_PASS' -eq "")) {
             $DB_MYSQL_PASS = $PROPERTIES.'DB_PASS'
         }
 
-        mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -D"$( $PROPERTIES.'DB_APIMGT' )" -h"$( $PROPERTIES.'DB_HOST' )" -e  "SOURCE $(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mysql.sql")"
+        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_APIMGT' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mysql.sql")"
         Write-Output "[NOTE] Database tables Created for: $( $PROPERTIES.'DB_APIMGT' )"
-        mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -D"$( $PROPERTIES.'DB_AM_CONFIG' )" -h"$( $PROPERTIES.'DB_HOST' )" -e "SOURCE $(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
+        
+        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_AM_CONFIG' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
         Write-Output "[NOTE] Database tables Created for: $( $PROPERTIES.'DB_AM_CONFIG' )"
-        mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -D"$( $PROPERTIES.'DB_GOV' )" -h"$( $PROPERTIES.'DB_HOST' )" -e "SOURCE $(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
+        
+        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_GOV' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
         Write-Output "[NOTE] Database tables Created for: $( $PROPERTIES.'DB_GOV' )"
-        mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -D"$( $PROPERTIES.'DB_USER_STORE' )" -h"$( $PROPERTIES.'DB_HOST' )" -e "SOURCE $(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
+        
+        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_USER_STORE' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
         Write-Output "[NOTE] Database tables Created for: $( $PROPERTIES.'DB_USER_STORE' )"
 
         mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -h"$( $PROPERTIES.'DB_HOST' )" -e "ALTER TABLE $( $PROPERTIES.'DB_APIMGT' ).SP_METADATA MODIFY VALUE VARCHAR(4096);"
     }
     else {
         Write-Output "[INFO] The database tables must be created manually for non mysql DBMSs."
-        Set-Content -Path (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mssql.sql") -Value (Get-Content (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mssql.sql") | ForEach-Object{ $_ -replace "FOREIGN KEY (CONSUMER_KEY_ID) REFERENCES IDN_OAUTH_CONSUMER_APPS(ID) ON DELETE CASCADE ,", "FOREIGN KEY (CONSUMER_KEY_ID) REFERENCES IDN_OAUTH_CONSUMER_APPS(ID)," })
-        Set-Content -Path (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mssql.sql") -Value (Get-Content (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mssql.sql") | ForEach-Object{ $_ -replace "FOREIGN KEY (TOKEN_ID) REFERENCES IDN_OAUTH2_ACCESS_TOKEN(TOKEN_ID),", "FOREIGN KEY (TOKEN_ID) REFERENCES IDN_OAUTH2_ACCESS_TOKEN(TOKEN_ID) ON DELETE CASCADE," })
+        Find-Replace (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mssql.sql") "FOREIGN KEY (CONSUMER_KEY_ID) REFERENCES IDN_OAUTH_CONSUMER_APPS(ID) ON DELETE CASCADE ," "FOREIGN KEY (CONSUMER_KEY_ID) REFERENCES IDN_OAUTH_CONSUMER_APPS(ID),"
+        Find-Replace (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mssql.sql") "FOREIGN KEY (TOKEN_ID) REFERENCES IDN_OAUTH2_ACCESS_TOKEN(TOKEN_ID)," "FOREIGN KEY (TOKEN_ID) REFERENCES IDN_OAUTH2_ACCESS_TOKEN(TOKEN_ID) ON DELETE CASCADE,"
     }
 }
 
@@ -168,7 +192,7 @@ Function Add-JsonFaultSequence
 {
     Write-Output "[INFO] Adding JSON Fault Sequence..."
     $CORS_REQ_HANDLER_PATH = (Join-Path $WSO2_BASE_PRODUCT_HOME "repository\deployment\server\synapse-configs\default\sequences\_cors_request_handler_.xml")
-    Set-Content -Path $CORS_REQ_HANDLER_PATH -Value (get-content $CORS_REQ_HANDLER_PATH | ForEach-Object{ $_ -replace "</sequence>", "`t<sequence key=`"jsonConverter`"/>`n</sequence>" })
+    Find-Replace $CORS_REQ_HANDLER_PATH "</sequence>" "`t<sequence key=`"jsonConverter`"/>`n</sequence>"
     Write-Output "[INFO] JSON Fault Sequence added!"
 }
 
@@ -199,6 +223,6 @@ Write-Output "============================================"
 Add-JsonFaultSequence
 
 $DEFAULT_JSON_FILE_PATH = Join-Path $WSO2_BASE_PRODUCT_HOME "repository\resources\conf\default.json"
-Set-Content -Path $DEFAULT_JSON_FILE_PATH -Value (get-content $DEFAULT_JSON_FILE_PATH | ForEach-Object{ $_ -replace "`"keystore.listener_profile.bind_address`": `"0.0.0.0`"", "`"keystore.listener_profile.bind_address`": `"0:0:0:0:0:0:0:0`"" })
+Find-Replace $DEFAULT_JSON_FILE_PATH "`"keystore.listener_profile.bind_address`": `"0.0.0.0`"" "`"keystore.listener_profile.bind_address`": `"0:0:0:0:0:0:0:0`""
 
 Exit-Clean
