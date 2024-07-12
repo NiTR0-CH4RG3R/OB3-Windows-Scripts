@@ -50,9 +50,8 @@ Function Find-Replace {
     # Escape special characters in OLD_TEXT for the regex
     $escapedOldText = [regex]::Escape($OLD_TEXT)
 
-    # Define the regex pattern to consider '=', whitespace, tab, and newline as boundaries
-    # $regex = "(?<=^|[\s=\t\r\n])" + $escapedOldText + "(?=$|[\s=\t\r\n])"
-    $regex = "(?<=^|[\s=\t\r\n`"`'])" + $escapedOldText + "(?=$|[\s=\t\r\n`"`'])"
+    # Define the regex pattern to consider non-word characters as boundaries
+    $regex = "(?<![a-zA-Z0-9_])" + $escapedOldText + "(?![a-zA-Z0-9_])"
 
     # Replace the whole words
     $NEW_CONTENT = [regex]::Replace($CONTENT, $regex, $NEW_TEXT)
