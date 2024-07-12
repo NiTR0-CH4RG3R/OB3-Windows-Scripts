@@ -45,10 +45,10 @@ Function Find-Replace {
     )
 
     # Read the file content
-    $CONTENT = Get-Content $FILE_PATH
+    $CONTENT = Get-Content $FILE_PATH -Raw
 
-    # Replace the text
-    $NEW_CONTENT = $CONTENT -replace [regex]::Escape($OLD_TEXT), $NEW_TEXT
+    # Replace the whole words
+    $NEW_CONTENT = $CONTENT -replace "\b$([regex]::Escape($OLD_TEXT))\b", $NEW_TEXT
 
     # Write the new content back to the file
     $NEW_CONTENT | Set-Content $FILE_PATH
