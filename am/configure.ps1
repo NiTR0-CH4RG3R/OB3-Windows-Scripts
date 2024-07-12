@@ -172,7 +172,7 @@ Function Add-DatabaseTables {
     if ($PROPERTIES.'DB_TYPE' -eq "mysql") {
 
         Write-Output "[NOTE] Update am_application_registration table input field size (temporary)"
-        Find-Replace (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mysql.sql") "INPUTS VARCHAR(1000)" "INPUTS VARCHAR(7500)"
+        Find-Replace (Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mysql.sql") "INPUTS VARCHAR(1000)," "INPUTS VARCHAR(7500),"
 
         $DB_MYSQL_PASS = ""
         if (-NOT($PROPERTIES.'DB_PASS' -eq "")) {
