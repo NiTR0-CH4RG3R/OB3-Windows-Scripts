@@ -38,8 +38,20 @@ Function Exit-Clean {
 
 # A utility function to Find and Replace texts in a file.
 Function Find-Replace {
-    param ([string]$File, [string]$Find, [string]$Replace)
-    Set-Content -Path $File -Value (get-content $File | ForEach-Object{ $_ -replace $Find, $Replace })
+    param(
+        [string]$FILE_PATH,
+        [string]$OLD_TEXT,
+        [string]$NEW_TEXT
+    )
+
+    # Read the file content
+    $CONTENT = Get-Content $FILE_PATH
+
+    # Replace the text
+    $NEW_CONTENT = $CONTENT -replace [regex]::Escape($OLD_TEXT), $NEW_TEXT
+
+    # Write the new content back to the file
+    $NEW_CONTENT | Set-Content $FILE_PATH
 }
 
 # Get the root directory location of the accelerator. Which is <BASE_PRODUCT>/<ACCELERATOR>/
