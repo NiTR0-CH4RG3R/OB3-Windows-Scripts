@@ -47,12 +47,19 @@ Function Find-Replace {
     # Read the file content
     $CONTENT = Get-Content $FILE_PATH -Raw
 
+    # Escape special characters in OLD_TEXT for the regex
+    $escapedOldText = [regex]::Escape($OLD_TEXT)
+
+    # Define the regex pattern to consider '=', whitespace, tab, and newline as boundaries
+    $regex = "(?<=^|[\s=\t\r\n])" + $escapedOldText + "(?=$|[\s=\t\r\n])"
+
     # Replace the whole words
-    $NEW_CONTENT = $CONTENT -replace "\b$([regex]::Escape($OLD_TEXT))\b", $NEW_TEXT
+    $NEW_CONTENT = [regex]::Replace($CONTENT, $regex, $NEW_TEXT)
 
     # Write the new content back to the file
     $NEW_CONTENT | Set-Content $FILE_PATH
 }
+
 
 # Get the root directory location of the accelerator. Which is <BASE_PRODUCT>/<ACCELERATOR>/
 Set-Location (Join-Path $PSScriptRoot ".\..\")
