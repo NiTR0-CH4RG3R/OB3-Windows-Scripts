@@ -1,18 +1,18 @@
- # Copyright (c) 2024, WSO2 LLC. (https://www.wso2.com).
- #
- # WSO2 LLC. licenses this file to you under the Apache License,
- # Version 2.0 (the "License"); you may not use this file except
- # in compliance with the License.
- # You may obtain a copy of the License at
- #
- #    http://www.apache.org/licenses/LICENSE-2.0
- #
- # Unless required by applicable law or agreed to in writing,
- # software distributed under the License is distributed on an
- # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- # KIND, either express or implied. See the License for the
- # specific language governing permissions and limitations
- # under the License.
+# Copyright (c) 2024, WSO2 LLC. (https://www.wso2.com).
+#
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 # How to execute :
 #   If your accelerator is located inside of the base product you can just call .\configure.ps1
@@ -80,7 +80,8 @@ if (-NOT(Test-Path (Join-Path $WSO2_BASE_PRODUCT_HOME "repository\components")))
     # The current path does not contain a valid carbon product.
     # Set the current working directory to the original location and exit.
     Exit-Clean
-} else {
+}
+else {
     Write-Output "[INFO] $WSO2_BASE_PRODUCT_HOME is a valid carbon product home."
 }
 
@@ -100,21 +101,23 @@ Copy-Item -Path $SELECTED_DEPLOYMENT_TOML_FILE $DEPLOYMENT_TOML_FILE
 Write-Output "[INFO] Temporary deployment.toml location : $DEPLOYMENT_TOML_FILE"
 
 # A function to replace the database related variables in the temp deployment.toml with their actual values from configure.properties 
-Function Set-Datasources
-{
-    if ($PROPERTIES.'DB_TYPE' -eq "mysql")
-    {
+Function Set-Datasources {
+    if ($PROPERTIES.'DB_TYPE' -eq "mysql") {
+        $DB_MYSQL_PORT = "3306"
+        if ($null -ne $PROPERTIES.'DB_PORT' -and $PROPERTIES.'DB_PORT' -ne "") {
+            $DB_MYSQL_PORT = $PROPERTIES.'DB_PORT'
+        }
+
         # MySQL
-        Find-Replace $DEPLOYMENT_TOML_FILE "DB_APIMGT_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_APIMGT' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
-        Find-Replace $DEPLOYMENT_TOML_FILE "DB_AM_CONFIG_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_AM_CONFIG' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
-        Find-Replace $DEPLOYMENT_TOML_FILE "DB_GOV_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_GOV' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
-        Find-Replace $DEPLOYMENT_TOML_FILE "DB_USER_STORE_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):3306/$( $PROPERTIES.'DB_USER_STORE' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_APIMGT_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):$DB_MYSQL_PORT/$( $PROPERTIES.'DB_APIMGT' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_AM_CONFIG_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):$DB_MYSQL_PORT/$( $PROPERTIES.'DB_AM_CONFIG' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_GOV_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):$DB_MYSQL_PORT/$( $PROPERTIES.'DB_GOV' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
+        Find-Replace $DEPLOYMENT_TOML_FILE "DB_USER_STORE_URL" "jdbc:mysql://$( $PROPERTIES.'DB_HOST' ):$DB_MYSQL_PORT/$( $PROPERTIES.'DB_USER_STORE' )?allowPublicKeyRetrieval=true&amp;autoReconnect=true&amp;useSSL=false"
         Find-Replace $DEPLOYMENT_TOML_FILE "DB_USER" "$( $PROPERTIES.'DB_USER' )"
         Find-Replace $DEPLOYMENT_TOML_FILE "DB_PASS" "$( $PROPERTIES.'DB_PASS' )"
         Find-Replace $DEPLOYMENT_TOML_FILE "DB_DRIVER" "$( $PROPERTIES.'DB_DRIVER' )"
     }
-    elseif($PROPERTIES.'DB_TYPE' -eq "mssql")
-    {
+    elseif ($PROPERTIES.'DB_TYPE' -eq "mssql") {
         # Microsoft SQL Server
         Find-Replace $DEPLOYMENT_TOML_FILE "DB_APIMGT_URL" "jdbc:sqlserver://$( $PROPERTIES.'DB_HOST' ):1433;databaseName=$( $PROPERTIES.'DB_APIMGT' );encrypt=false"
         Find-Replace $DEPLOYMENT_TOML_FILE "DB_AM_CONFIG_URL" "jdbc:sqlserver://$( $PROPERTIES.'DB_HOST' ):1433;databaseName=$( $PROPERTIES.'DB_AM_CONFIG' );encrypt=false"
@@ -139,14 +142,15 @@ Function Set-Hostnames {
 
 # A utility function to create a database.
 Function Add-Database {
-    param ([string]$DB_USER, [string]$DB_PASS, [string]$DB_HOST, [string]$DB_NAME)
-    mysql -u"$($DB_USER)" -p"$($DB_PASS)" -h"$($DB_HOST)" -e "DROP DATABASE IF EXISTS $($DB_NAME); CREATE DATABASE $( $DB_NAME ) DEFAULT CHARACTER SET latin1;"
+    param ([string]$DB_USER, [string]$DB_PASS, [string]$DB_HOST, [string]$DB_PORT, [string]$DB_NAME)
+    mysql -u"$($DB_USER)" -p"$($DB_PASS)" -h"$($DB_HOST)" -P $DB_PORT -e "DROP DATABASE IF EXISTS $($DB_NAME); CREATE DATABASE $( $DB_NAME ) DEFAULT CHARACTER SET latin1;"
 }
 
 # A utility function to create a table inside a given database.
 Function Add-TablesToDatabase {
-    param ([string]$DB_USER, [string]$DB_PASS, [string]$DB_HOST, [string]$DB_NAME, [string]$DB_SOURCE)
-    mysql -u"$($DB_USER)" -p"$($DB_PASS)" -h"$($DB_HOST)" -D"$($DB_NAME)" -e "SOURCE $($DB_SOURCE)"
+    param ([string]$DB_USER, [string]$DB_PASS, [string]$DB_HOST, [string]$DB_PORT, [string]$DB_NAME, [string]$DB_SOURCE)
+    $COMMAND = "mysql -u`"$DB_USER`" -p`"$DB_PASS`" -h`"$DB_HOST`" -P `"$DB_PORT`" -D`"$DB_NAME`" < `"$DB_SOURCE`""
+    cmd.exe /c $COMMAND
 }
 
 # A function to create the databases. ONLY SUPPORTED FOR THE MYSQL
@@ -157,16 +161,21 @@ Function Add-Databases {
             $DB_MYSQL_PASS = $PROPERTIES.'DB_PASS'
         }
 
-        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_APIMGT' )"
+        $DB_MYSQL_PORT = "3306"
+        if ($null -ne $PROPERTIES.'DB_PORT' -and $PROPERTIES.'DB_PORT' -ne "") {
+            $DB_MYSQL_PORT = $PROPERTIES.'DB_PORT'
+        }
+
+        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" $DB_MYSQL_PORT "$( $PROPERTIES.'DB_APIMGT' )"
         Write-Output "[INFO] Database Created: $( $PROPERTIES.'DB_APIMGT' )"
         
-        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_AM_CONFIG' )"
+        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" $DB_MYSQL_PORT "$( $PROPERTIES.'DB_AM_CONFIG' )"
         Write-Output "[INFO] Database Created: $( $PROPERTIES.'DB_AM_CONFIG' )"
         
-        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_GOV' )"
+        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" $DB_MYSQL_PORT "$( $PROPERTIES.'DB_GOV' )"
         Write-Output "[INFO] Database Created: $( $PROPERTIES.'DB_GOV' )"
         
-        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_USER_STORE' )"
+        Add-Database "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" $DB_MYSQL_PORT "$( $PROPERTIES.'DB_USER_STORE' )"
         Write-Output "[INFO] Database Created: $( $PROPERTIES.'DB_USER_STORE' )"        
     }
     else {
@@ -186,19 +195,24 @@ Function Add-DatabaseTables {
             $DB_MYSQL_PASS = $PROPERTIES.'DB_PASS'
         }
 
-        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_APIMGT' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mysql.sql")"
+        $DB_MYSQL_PORT = "3306"
+        if ($null -ne $PROPERTIES.'DB_PORT' -and $PROPERTIES.'DB_PORT' -ne "") {
+            $DB_MYSQL_PORT = $PROPERTIES.'DB_PORT'
+        }
+
+        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" $DB_MYSQL_PORT "$( $PROPERTIES.'DB_APIMGT' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\apimgt\mysql.sql")"
         Write-Output "[NOTE] Database tables Created for: $( $PROPERTIES.'DB_APIMGT' )"
         
-        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_AM_CONFIG' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
+        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" $DB_MYSQL_PORT "$( $PROPERTIES.'DB_AM_CONFIG' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
         Write-Output "[NOTE] Database tables Created for: $( $PROPERTIES.'DB_AM_CONFIG' )"
         
-        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_GOV' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
+        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" $DB_MYSQL_PORT "$( $PROPERTIES.'DB_GOV' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
         Write-Output "[NOTE] Database tables Created for: $( $PROPERTIES.'DB_GOV' )"
         
-        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" "$( $PROPERTIES.'DB_USER_STORE' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
+        Add-TablesToDatabase "$( $PROPERTIES.'DB_USER' )" $DB_MYSQL_PASS "$( $PROPERTIES.'DB_HOST' )" $DB_MYSQL_PORT "$( $PROPERTIES.'DB_USER_STORE' )" "$(Join-Path $WSO2_BASE_PRODUCT_HOME "dbscripts\mysql.sql")"
         Write-Output "[NOTE] Database tables Created for: $( $PROPERTIES.'DB_USER_STORE' )"
 
-        mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -h"$( $PROPERTIES.'DB_HOST' )" -e "ALTER TABLE $( $PROPERTIES.'DB_APIMGT' ).SP_METADATA MODIFY VALUE VARCHAR(4096);"
+        mysql -u"$( $PROPERTIES.'DB_USER' )" -p"$DB_MYSQL_PASS" -h"$( $PROPERTIES.'DB_HOST' )" -P "$DB_MYSQL_PORT" -e "ALTER TABLE $( $PROPERTIES.'DB_APIMGT' ).SP_METADATA MODIFY VALUE VARCHAR(4096);"
     }
     else {
         Write-Output "[INFO] The database tables must be created manually for non mysql DBMSs."
@@ -207,8 +221,7 @@ Function Add-DatabaseTables {
     }
 }
 
-Function Add-JsonFaultSequence
-{
+Function Add-JsonFaultSequence {
     Write-Output "[INFO] Adding JSON Fault Sequence..."
     $CORS_REQ_HANDLER_PATH = (Join-Path $WSO2_BASE_PRODUCT_HOME "repository\deployment\server\synapse-configs\default\sequences\_cors_request_handler_.xml")
     Find-Replace $CORS_REQ_HANDLER_PATH "</sequence>" "`t<sequence key=`"jsonConverter`"/>`n</sequence>"
