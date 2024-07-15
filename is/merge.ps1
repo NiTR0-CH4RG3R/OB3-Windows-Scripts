@@ -108,6 +108,7 @@ if (Test-Path $CONSENTMGR_RUNTIME_JS_BACKUP_PATH -PathType Leaf) {
     # Copy back the backed up runtime-config.js
     Write-Output "[INFO] Copying $CONSENTMGR_RUNTIME_JS_BACKUP_PATH to $CONSENTMGR_RUNTIME_JS_PATH..."
     Copy-Item $CONSENTMGR_RUNTIME_JS_BACKUP_PATH -Destination $CONSENTMGR_RUNTIME_JS_PATH -Force
+    Remove-Item -LiteralPath $CONSENTMGR_RUNTIME_JS_BACKUP_PATH -Force
 }
 
 Remove-Item -LiteralPath $CONSENTMGR_PATH_ZIP -Force
