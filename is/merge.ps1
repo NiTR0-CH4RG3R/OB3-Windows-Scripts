@@ -72,17 +72,28 @@ Write-Output "[INFO] Copying new open-banking artifacts..."
 Robocopy.exe (Join-Path $WSO2_OB_ACCELERATOR_HOME "carbon-home") $WSO2_BASE_PRODUCT_HOME * /E /NFL /NDL /NJH /NJS /nc /ns /np
 Write-Output "[INFO] All the new OB artifacts has been copied!"
 
+$WEB_APPS_PATH = (Join-Path $WSO2_BASE_PRODUCT_HOME "repository\deployment\server\webapps")
+
 # Delete the consentmgr web app if it exists.
-$CONSENTMGR_PATH = (Join-Path $WSO2_BASE_PRODUCT_HOME "repository\deployment\server\webapps\consentmgr")
+$CONSENTMGR_PATH = (Join-Path $WEB_APPS_PATH "consentmgr")
+$CONSENTMGR_RUNTIME_JS_PATH = (Join-Path $CONSENTMGR_PATH "runtime-config.js")
+$CONSENTMGR_RUNTIME_JS_BACKUP_PATH = (Join-Path $WEB_APPS_PATH "runtime-config.js")
 if (Test-Path $CONSENTMGR_PATH) {
     Write-Output "[INFO] consentmgr web app detected at `"$CONSENTMGR_PATH`""
+    
+    if (Test-Path $CONSENTMGR_RUNTIME_JS_PATH -PathType Leaf) {
+        # If the consentmgr/runtime-config,js file exists, backup it to the webapps directory before deleting the directory
+        Write-Output "[INFO] Copying $CONSENTMGR_RUNTIME_JS_PATH to $CONSENTMGR_RUNTIME_JS_BACKUP_PATH..."
+        Copy-Item $CONSENTMGR_RUNTIME_JS_PATH -Destination $CONSENTMGR_RUNTIME_JS_BACKUP_PATH -Force
+    }
+
     Write-Output "[INFO] Deleting the current consentmgr web app..."
     Remove-Item -LiteralPath $CONSENTMGR_PATH -Force -Recurse
     Write-Output "[INFO] Deleted the current consentmgr web app!"
 }
 
-$CONSENTMGR_PATH_WAR = (Join-Path $WSO2_BASE_PRODUCT_HOME "repository\deployment\server\webapps\consentmgr.war")
-$CONSENTMGR_PATH_ZIP = (Join-Path $WSO2_BASE_PRODUCT_HOME "repository\deployment\server\webapps\consentmgr.zip")
+$CONSENTMGR_PATH_WAR = (Join-Path $WEB_APPS_PATH "consentmgr.war")
+$CONSENTMGR_PATH_ZIP = (Join-Path $WEB_APPS_PATH "consentmgr.zip")
 
 # Expand-Archive cmdlet cannot directly extract the .war files. Since .war files are just zip files with some custom file headers and a fancy extension
 # we can just rename the war file and extract it.
@@ -92,6 +103,12 @@ Move-Item -Path $CONSENTMGR_PATH_WAR -Destination $CONSENTMGR_PATH_ZIP -Force
 Write-Output "[INFO] Extracting the new consentmgr..."
 Expand-Archive -LiteralPath $CONSENTMGR_PATH_ZIP -DestinationPath $CONSENTMGR_PATH -Force
 Write-Output "[INFO] New consentmgr extracted!"
+
+if (Test-Path $CONSENTMGR_RUNTIME_JS_BACKUP_PATH -PathType Leaf) {
+    # Copy back the backed up runtime-config.js
+    Write-Output "[INFO] Copying $CONSENTMGR_RUNTIME_JS_BACKUP_PATH to $CONSENTMGR_RUNTIME_JS_PATH..."
+    Copy-Item $CONSENTMGR_RUNTIME_JS_BACKUP_PATH -Destination $CONSENTMGR_RUNTIME_JS_PATH -Force
+}
 
 Remove-Item -LiteralPath $CONSENTMGR_PATH_ZIP -Force
 
