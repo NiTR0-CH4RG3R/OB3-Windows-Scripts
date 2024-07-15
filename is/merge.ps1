@@ -18,6 +18,11 @@
 #   If your accelerator is located inside of the base product you can just call .\merge.ps1
 #   If your accelerator is in a different location you can call .\merge.ps1 <YOUR_BASE_PRODUCT_HOME_DIR>
 
+# IMPORTANT : 
+#   Please note that these powershell files are not digitally signed yet. So, powershell will not allow these scripts under any of their execution policies.
+#   You may need to run these scripts on an execution policy bypassed powershell instance. You can do that using the following command.
+#       powershell.exe -executionpolicy bypass <SCRIPT_FILEPATH>
+
 # Get the current working directory of the powershell session, so we can set to this directory after the script finishes.
 $CURRENT_DIRECTORY = (Get-Location).path
 
