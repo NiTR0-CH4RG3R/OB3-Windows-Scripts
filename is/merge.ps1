@@ -15,7 +15,7 @@
  # under the License.
 
 # How to execute :
-#   If your accelerator is located inside of the base product you can just call .\configure.ps1
+#   If your accelerator is located inside of the base product you can just call .\merge.ps1
 #   If your accelerator is in a different location you can call .\merge.ps1 <YOUR_BASE_PRODUCT_HOME_DIR>
 
 # Get the current working directory of the powershell session, so we can set to this directory after the script finishes.
